@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# default setting for int.example.com zone file
+# default settings for int.example.com zone file
 
 serial=$(date +%Y%m%d)1             
+domain="int.example.com"
 nameserver="ns.int.example.com"
 ttl="3h"
 refresh="1d"
