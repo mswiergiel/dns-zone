@@ -2,7 +2,7 @@
 
 # default settings for int.example.com zone file
 
-serial=$(date +%Y%m%d)1             
+serial=$(date +%Y%m%d)             
 domain="int.example.com"
 nameserver="ns.int.example.com"
 ttl="3h"
