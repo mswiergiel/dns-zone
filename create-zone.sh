@@ -19,7 +19,6 @@ echo "              )"
 echo "              NS  ${domain}."
 echo "\$ORIGIN ${domain}."
 echo "\$INCLUDE $static"
-echo "\$INCLUDE $static.2"
 echo ""
 
 
