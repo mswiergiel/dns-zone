@@ -1,0 +1,54 @@
+#!/bin/bash
+# CHECK ALL THE ZONES ANYWHERE
+# THIS WILL OUTPUT NOTHING IF EVERYTHING IS FINE
+
+
+checkzone() {
+   # domain_name zonefile
+   output=`named-checkzone $1 $2 2>&1`
+   if [ $? != 0 ]; then
+       echo -e "\n$2 file has errors!\n\n"
+       echo -e "$output\n"
+   fi
+   return 0
+}
+
+# check everything
+if [ -d master ]; then
+    for zonefile in master/*; do
+       if [ "${zonefile:(-1)}" != '~' ]; then
+           zone=`basename $zonefile`
+           checkzone ${zone} ${zonefile}
+       fi
+    done
+fi
+
+if [ -d built ]; then
+for zonefile in built/*; do
+    # ignore the dsset files and the README :(
+    if ! [[ $zonefile == built/dsset* || $zonefile == built/README* || $zonefile == built/*~  || $zonefile == built/*.bak ]]; then
+       if [ -f $zonefile ]; then
+       
+           zone=`basename $zonefile | sed -e "s/.signed//g"`
+          checkzone ${zone} ${zonefile}
+       fi
+    fi
+done
+fi
+
+AREA="NA EU GB DEFAULT"
+template_zones="intapp.bm.org"
+
+for zone in $template_zones; do
+    for a in $AREA; do
+        if [ -f built/$a/${zone} ]; then
+           checkzone ${zone} built/$a/${zone}
+           checkzone ${zone} built/$a/${zone}.signed
+        fi
+    done
+done
+
+
+
+
+
