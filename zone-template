@@ -9,6 +9,7 @@ import time
 
 def main(args):
     # read in a config file(
+    config_sys = {}
     config_opts = {}
     execfile(args[0])
 
