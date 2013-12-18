@@ -1,0 +1,84 @@
+#!/bin/bash
+keyspath="/srv/privatekeys/dnssec"
+region_zones="domain.example.com"
+# templated zones are jst templated zones
+template_zones="template"
+# signed zones are the zones we sign for dnssec
+signed_zones=""
+AREA="NA EU GB DEFAULT"
+
+
+checkzone() {
+   # domain_name zonefile
+   output=`named-checkzone -q $1 $2 2>&1`
+   if [ $? != 0 ]; then
+       echo "$2 file has errors - aborting!"
+       echo $output
+       echo "run 'git reset --hard' to revert all changes and start over"
+       exit 1
+   fi
+   return 0
+}
+
+signzone() {
+   #zonefile to be signed
+   pushd built >>/dev/null
+   zonefile=`echo $2 | sed -e "s/built\///g"`
+   echo "dnssec-signzone -K $keyspath -o $1 $zonefile"
+   dnssec-signzone -K $keyspath -o $1 $zonefile
+   if [ $? != 0 ]; then
+       echo "$1 could not be signed - aborting!"
+       echo "run 'git reset --hard' to revert all changes and start over"
+       popd >>/dev/null
+       exit 1
+   fi
+   popd >>/dev/null
+   return 0
+}
+
+echo "checking our normal zones"    
+# check everything
+for zonefile in master/*; do
+    if [ "${zonefile:(-1)}" != '~' ]; then
+        zone=`basename $zonefile`
+        checkzone ${zone} ${zonefile}
+        /bin/cp ${zonefile} built/${zone}
+    fi
+done
+
+
+echo "building and checking the template zones"
+
+for zone in $template_zones; do
+     echo $zone
+    ./zone-template ${zone}.cfg
+    checkzone ${zone} built/${zone}
+done
+
+echo "building and checking the region, template zones"
+for zone in $region_zones; do
+    echo -n "$zone "
+    ./zone-template ${zone}.cfg
+    for a in $AREA; do
+        echo -n "$AREA "
+        checkzone ${zone} built/$a/${zone}
+        signzone ${zone} built/$a/${zone}
+    done
+    echo -e "\n"
+done
+
+
+# sign the other sign zones
+for zone in $signed_zones; do
+    signzone ${zone} built/${zone}
+done
+
+# commit it all
+echo "All commands executed correctly. Now you can run:"
+echo "git add ."
+echo "git commit -a -m 'done build'"
+echo "git push"
+
+
+
+
