@@ -5,6 +5,7 @@ region_zones="domain.example.com"
 template_zones="template"
 # signed zones are the zones we sign for dnssec
 signed_zones=""
+not_signed_zones=""
 AREA="NA EU GB DEFAULT"
 
 
