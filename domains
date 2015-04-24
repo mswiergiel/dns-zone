@@ -74,11 +74,7 @@ for zone in $signed_zones; do
     signzone ${zone} built/${zone}
 done
 
-# commit it all
-echo "All commands executed correctly. Now you can run:"
-echo "git add ."
-echo "git commit -a -m 'done build'"
-echo "git push"
+
 
 
 
